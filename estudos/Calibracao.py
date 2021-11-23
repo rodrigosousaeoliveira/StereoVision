@@ -4,6 +4,8 @@ import numpy as np
 # Variaveis de entrada
 tabuleiro = (9,7) # Formato do tabuleiro: (maior,menor)
 camera = "1" # Camera a calibrar: 0 ou 1
+ncapturas = 15
+folder = "calib"
 
 # Declara vetor de pontos no tabuleiro (1 casa = unidade)
 pts_tabuleiro = np.zeros((tabuleiro[0]*tabuleiro[1], 3), np.float32)
@@ -14,9 +16,9 @@ pts_imagens = []
 pts_tabuleiros = []
 
 # Loop for itera os indices das imagens
-for i in range(10):
+for i in range(ncapturas):
     
-    fname = 'cam' + camera + '_'+ str(i) +'.png'
+    fname = folder + '/cam' + camera + '_'+ str(i) +'.png'
     img = cv2.imread(fname)
     peb = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
@@ -35,7 +37,7 @@ for i in range(10):
     """
 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(pts_tabuleiros, pts_imagens
                                                   , peb.shape[::-1], None, None)
-img = cv2.imread('cam1_4.png')
+img = cv2.imread(folder + '/cam1_5.png')
 h,  w = img.shape[:2]
 newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w,h), 1, (w,h))
 
