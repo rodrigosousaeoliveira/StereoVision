@@ -32,10 +32,10 @@ for i in range(ncapturas):
         pts_imagens.append(cantos)
     
         cv2.drawChessboardCorners(img, tabuleiro, cantos, ret)
-    
+    """
     cv2.imshow(fname,img)
     cv2.waitKey(0)
-    """
+    
 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(pts_tabuleiros, pts_imagens
                                                   , peb.shape[::-1], None, None)
     """
