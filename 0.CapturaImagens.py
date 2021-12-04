@@ -4,7 +4,7 @@ import time
 stereo = True
 camera = 1
 folder = "img"
-ncapturas = 20
+ncapturas = 15
 
 # Inicia as cameras
 camera0 = cv2.VideoCapture(0)
@@ -24,9 +24,12 @@ aviso = True
 while(True):
 
     timer = time.perf_counter() - start
+    if stereo:
+        frames =  [cameras[0].read()[1], cameras[1].read()[1]]
+        frame = frames[camera]
+    else:
+        frame = cameras[camera].read()[1]
     
-    frames =  [cameras[0].read()[1], cameras[1].read()[1]]
-    frame = frames[camera]
         
     if timer > 4 and aviso:
         print('Capturando par de fotos numero ' + str(conta_fotos+1))   
@@ -35,22 +38,26 @@ while(True):
     # Captura de imagens com periodo de 5 seg
     if timer > 5:
         if stereo:
+            folder = "img/stereo"
             cv2.imwrite(folder + '/st_cam0_' + str(conta_fotos) + '.png', frames[0])
             cv2.imwrite(folder + '/st_cam1_' + str(conta_fotos) + '.png', frames[1])
         else:
             caminho = folder + '/cam' + str(camera) + '_' + str(conta_fotos) + '.png'
             cv2.imwrite(caminho, frame)
             
-        if conta_fotos >=(ncapturas-1) :
+        if conta_fotos >=(ncapturas-1) : # Limita o numero de capturas a ncapturas
             break
         start = time.perf_counter() # Reinicia timer apos captura
         aviso = True           
         conta_fotos += 1
     
-    frame2 = frame.copy()
+    frame2 = frame.copy() # Insere tempo de capturana imagem adicionada
     cv2.putText(frame2, str(5-timer)[:3], (50,50), cv2.FONT_HERSHEY_DUPLEX, 1,
                          (255,255,255))
+    cv2.putText(frame2, "CAPTURA " + str(conta_fotos+1) + " DE " + str(ncapturas),
+    (200,50), cv2.FONT_HERSHEY_DUPLEX, 1, (0,0,255))
     cv2.imshow("Camera " + str(camera), cv2.resize(frame2, (640, 360)) )
+    
     if stereo:
         outraCamera = 1 - camera
         cv2.imshow("Camera " + str(outraCamera), cv2.resize(frames[outraCamera], (640, 360)) )
