@@ -3,8 +3,8 @@ import numpy as np
 
 # Variaveis de entrada
 tabuleiro = (9,7) # Formato do tabuleiro: (maior,menor)
-camera = "1" # Camera a calibrar: 0 ou 1
-ncapturas = 15
+camera = "0" # Camera a calibrar: 0 ou 1
+ncapturas = 20
 folder = "calib"
 
 # Declara vetor de pontos no tabuleiro (1 casa = unidade)
@@ -37,12 +37,13 @@ for i in range(ncapturas):
     """
 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(pts_tabuleiros, pts_imagens
                                                   , peb.shape[::-1], None, None)
+
 img = cv2.imread(folder + '/cam1_5.png')
 h,  w = img.shape[:2]
 newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w,h), 1, (w,h))
 
 # undistort
-dst = cv2.undistort(img, mtx, dist, None, newcameramtx)
+dst = cv2.undistort(img, mtx, dist, None, mtx)
 # crop the image
 #x, y, w, h = roi
 #dst = dst[y:y+h, x:x+w]
