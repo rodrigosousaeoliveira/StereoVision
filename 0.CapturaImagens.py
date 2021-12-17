@@ -4,7 +4,7 @@ import time
 stereo = True
 camera = 1
 folder = "img"
-ncapturas = 15
+ncapturas = 20
 
 # Inicia as cameras
 camera0 = cv2.VideoCapture(0)

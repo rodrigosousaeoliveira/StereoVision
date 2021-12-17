@@ -4,7 +4,7 @@ import pandas as pd
 
 # Variaveis de entrada
 tabuleiro = (9,7) # Formato do tabuleiro: (maior,menor)
-camera = "1" # Camera a calibrar: 0 ou 1
+camera = "0" # Camera a calibrar: 0 ou 1
 ncapturas = 20
 folder = "img"
 calibration_flags = cv2.fisheye.CALIB_RECOMPUTE_EXTRINSIC + cv2.fisheye.CALIB_CHECK_COND + cv2.fisheye.CALIB_FIX_SKEW
@@ -12,7 +12,7 @@ calibration_flags = cv2.fisheye.CALIB_RECOMPUTE_EXTRINSIC + cv2.fisheye.CALIB_CH
 # Declara vetor de pontos no tabuleiro (1 casa = unidade)
 pts_tabuleiro = np.zeros((1,tabuleiro[0]*tabuleiro[1], 3), np.float32)
 pts_tabuleiro[0,:, :2] = np.mgrid[0:tabuleiro[0], 0:tabuleiro[1]].T.reshape(-1,2)
-pts_tabuleiro = 22*pts_tabuleiro
+
 # Listas para adicao de pontos identificados nas imagens e pontos de tabuleiro
 pts_imagens = []
 pts_tabuleiros = []
