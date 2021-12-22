@@ -1,7 +1,3 @@
-# Standard imports
-import cv2
-import numpy as np
-
 #!/usr/bin/env python
 
 # Author: Kwasi Mensah (kmensah@andrew.cmu.edu)
@@ -20,7 +16,7 @@ from panda3d.core import lookAt
 from panda3d.core import GeomVertexFormat, GeomVertexData
 from panda3d.core import Geom, GeomTriangles, GeomVertexWriter
 from panda3d.core import Texture, GeomNode
-from panda3d.core import PerspectiveLens
+from panda3d.core import PerspectiveLens, OrthographicLens
 from panda3d.core import CardMaker
 from panda3d.core import Light, Spotlight
 from panda3d.core import TextNode
@@ -32,10 +28,9 @@ import time
 
 base = ShowBase()
 base.disableMouse()
-base.camera.setPos(0, 0, -500)
-base.camera.setHpr(0, 90, 0)
+base.camera.setPos(0, -100, 0)
 
-title = OnscreenText(text="StereoVision: Estimativa de posição do alvo",
+title = OnscreenText(text="Panda3D: Tutorial - Making a Cube Procedurally",
                      style=1, fg=(1, 1, 1, 1), pos=(-0.1, 0.1), scale=.07,
                      parent=base.a2dBottomRight, align=TextNode.ARight)
 escapeEvent = OnscreenText(text="1: Set a Texture onto the Cube",
@@ -115,7 +110,7 @@ def makeSquare(x1, y1, z1, x2, y2, z2):
     square.addPrimitive(tris)
     return square
 
-def makeTriangle(x1, y1, z1, x2, y2, z2, x3, y3, z3, s):
+def makeTriangle(x1, y1, z1, x2, y2, z2, x3, y3, z3,s):
     x1, y1, z1, x2, y2, z2, x3, y3, z3 = [s*k for k in [x1, y1, z1, x2, y2, z2, x3, y3, z3]]
     format = GeomVertexFormat.getV3n3cpt2()
     vdata = GeomVertexData('square', format, Geom.UHDynamic)
@@ -156,10 +151,11 @@ def makeTriangle(x1, y1, z1, x2, y2, z2, x3, y3, z3, s):
 
 # Note: it isn't particularly efficient to make every face as a separate Geom.
 # instead, it would be better to create one Geom holding all of the faces.
-tri0 = makeTriangle(-1,0,0,1,0.1,0,1,0,-0.5,20)
-tri1 = makeTriangle(-1,0,0,1,0.1,0,1,0.5,0,20)
-tri2 = makeTriangle(-1,0,0,1,-0.1,0,1,0,-0.5,20)
-tri3 = makeTriangle(-1,0,0,1,-0.1,0,1,-0.5,0,20)
+ss = 4
+tri0 = makeTriangle(-1,0,0,1,0.1,0,1,0,-0.5,ss)
+tri1 = makeTriangle(-1,0,0,1,0.1,0,1,0.5,0,ss)
+tri2 = makeTriangle(-1,0,0,1,-0.1,0,1,0,-0.5,ss)
+tri3 = makeTriangle(-1,0,0,1,-0.1,0,1,-0.5,0,ss)
 
 snode = GeomNode('square')
 snode.addGeom(tri0)
@@ -187,7 +183,7 @@ class MyTapper(DirectObject):
         self.LightsOn1 = False
         slight = Spotlight('slight')
         slight.setColor((1, 1, 1, 1))
-        lens = PerspectiveLens()
+        lens = OrthographicLens()
         slight.setLens(lens)
         self.slnp = render.attachNewNode(slight)
         self.slnp1 = render.attachNewNode(slight)
@@ -205,8 +201,8 @@ class MyTapper(DirectObject):
 
         if self.LightsOn:
             render.setLight(self.slnp)
-            self.slnp.setPos(avi, 10, -400, 0)
-            self.slnp.lookAt(10, 0, 0)
+            self.slnp.setPos(avi, 100, 400, 0)
+            self.slnp.lookAt(100, 0, 0)
         else:
             render.setLightOff(self.slnp)
 
@@ -222,75 +218,13 @@ class MyTapper(DirectObject):
             render.setLightOff(self.slnp1)
 
 t = MyTapper()
+start = time.perf_counter()
+fps = 15
 p = 1
-
-camera1 = cv2.VideoCapture(0)
-#camera0.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-#camera0.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-
-# Setup SimpleBlobDetector parameters.
-params = cv2.SimpleBlobDetector_Params()
-
-# Change thresholds
-params.minThreshold = 10;
-params.maxThreshold = 200;
-
-# Filter by Area.
-params.filterByArea = True
-params.minArea = 100
-
-# Filter by Circularity
-params.filterByCircularity = True
-params.minCircularity = 0.77
-
-# Filter by Convexity
-params.filterByConvexity = True
-params.minConvexity = 0.87
-
-# Filter by Inertia
-params.filterByInertia = True
-params.minInertiaRatio = 0.2
-
-# Create a detector with the parameters
-ver = (cv2.__version__).split('.')
-
-if int(ver[0]) < 3 :
-	detector = cv2.SimpleBlobDetector(params)
-else : 
-	detector = cv2.SimpleBlobDetector_create(params)
-
-ptx0 = 330
-pty0 = 220
-avi.setHpr(90,0,0)
-while(True):
-    
-    ret, frame = camera1.read()
-    
-    peb = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    
-    # Detect blobs.
-    keypoints2 = detector.detect(peb)
-    
-    # Draw detected blobs as red circles.
-    # cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS ensures the size of the circle corresponds to the size of blob
-    im2_with_keypoints = cv2.drawKeypoints(frame, keypoints2, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-    
-    try:
-        ptx,pty = cv2.KeyPoint_convert(keypoints2)[0]
-    except:
-        ptx,pty = ptx0,pty0
-    dx = ptx-ptx0
-    dy = pty-pty0
-        
-    cv2.imshow("Camera 1", im2_with_keypoints)
-    #cv2.imshow("Camera 0", frame0)
-    #cv2.imshow("Camera 1", frame)
-    
-    k = cv2.waitKey(30) & 0xff
-    if k == 27:
-        break
-
-    avi.setPos(dx,dy,0)
-    taskMgr.step()
-camera1.release()
-cv2.destroyAllWindows()
+while True:
+    tm = time.perf_counter() - start
+    if tm >= 1/fps: 
+        p +=10
+        avi.setHpr(p,p,0)
+        taskMgr.step()
+        start = time.perf_counter()
